@@ -31,9 +31,21 @@ console.log('örnek görev:', ilkiniDon(['as','sa'],function(metin){return metin
   
   1. skor1 ve skor2 arasındaki fark nedir?
   
+  skor1'de skor değişkeni ve skorGuncelle fonksiyonu, skorArtirici fonksiyonunun içinde tanımlanmıştır.
+  Bu nedenle skor değişkenine ve skorGuncelle fonksiyonuna, skorArtirici fonksiyonu dışından erişilemez.
+  skor2'de ise skor değişkeni global scope'ta tanımlanmıştır. skor2 fonksiyonu bu değişkene dışarıdan ulaşarak işlemi yerine getirir.
+  skor değişkenine fonksiyon dışından da ulaşılabilir.
+ 
   2. Hangisi bir closure kullanmaktadır? Nasıl tarif edebilirsin? (yarınki derste öğreneceksin :) )
   
+  skor1'de closure kullanılmıştır. skorGuncelle fonksiyonu ve skor değişkeni, skorArtirici fonksiyonun içinde tanımlanmıştır.
+  Dolayısıyla skorArtirici fonksiyonu, skorGuncelle fonksiyonu ve skor değişkenini kapsayan bir closure oluşturur.
+  Böylece bu fonksiyon ve değişkene skorArtirici fonksiyonu dışından ulaşılamaz.
+
   3. Hangi durumda skor1 tercih edilebilir? Hangi durumda skor2 daha mantıklıdır?
+  skor değişkenini tek bir olayda kullanacaksak skor2 kullanılabilir. Ancak örneğin skor1 ve skor2 gibi birden fazla durum için
+  skor hesaplayacaksak, skor1'i tercih etmemiz gerekir. Böylece ihtiyacımız olduğunda skorArtirici fonksiyonunu farklı işlemlerde kullanabiliriz.
+  skor değişkenleri kodumuzda bir karışıklığa yol açmamış olur.
 */
 
 // skor1 kodları
@@ -64,9 +76,10 @@ Aşağıdaki takimSkoru() fonksiyonununda aşağıdakileri yapınız:
 Not: Bu fonskiyon, aşağıdaki diğer görevler için de bir callback fonksiyonu olarak da kullanılacak
 */
 
-function takimSkoru(/*Kodunuzu buraya yazınız*/){
-    /*Kodunuzu buraya yazınız*/
-}
+function takimSkoru() {
+    return Math.floor(Math.random() * 16 + 10);
+};
+console.log("Görev 2:", takimSkoru());
 
 
 
@@ -86,9 +99,21 @@ Aşağıdaki macSonucu() fonksiyonununda aşağıdakileri yapınız:
 }
 */ 
 
-function macSonucu(/*Kodunuzu buraya yazınız*/){
-  /*Kodunuzu buraya yazınız*/
+function macSonucu(callback, ceyrekSayisi){
+  let evSahibi = 0;
+  let konukTakim = 0;
+  for (let i = 0; i < ceyrekSayisi; i++) {
+   const evSahibiCeyrek = callback();
+   const konukTakimCeyrek = callback();
+   evSahibi += evSahibiCeyrek;
+   konukTakim += konukTakimCeyrek;
+  };
+  return {
+    "EvSahibi": evSahibi,
+    "KonukTakim": konukTakim,
+  };
 }
+ console.log("Görev 3", macSonucu(takimSkoru, 4));
 
 
 
@@ -109,10 +134,15 @@ Aşağıdaki periyotSkoru() fonksiyonununda aşağıdakileri yapınız:
   */
 
 
-function periyotSkoru(/*Kodunuzu buraya yazınız*/) {
-  /*Kodunuzu buraya yazınız*/
-
+function periyotSkoru(callback) {
+  let evSahibi = callback();
+  let konukTakim = callback();
+  return {
+    "EvSahibi": evSahibi,
+    "KonukTakim": konukTakim,
+  }
 }
+console.log("Görev 4", periyotSkoru(takimSkoru));
 
 
 /* Zorlayıcı Görev 5: skorTabelasi() 
@@ -146,10 +176,30 @@ MAÇ UZAR ise skorTabelasi(periyotSkoru,takimSkoru,4)
 ] */
 // NOTE: Bununla ilgili bir test yoktur. Eğer logladığınız sonuçlar yukarıdakine benziyor ise tmamlandı sayabilirsiniz.
 
-function skorTabelasi(/*Kodunuzu buraya yazınız*/) {
-  /*Kodunuzu buraya yazınız*/
+function skorTabelasi(periyotSkoruCallBack, takimSkoruCallBack, ceyrekSayisi) {
+  let evSahibiSkor = 0;
+  let konukTakimSkor = 0;
+  let sonuc = [];
+  for (let i = 1; i <= ceyrekSayisi; i++) {
+    const periyot = periyotSkoruCallBack(takimSkoruCallBack);
+    sonuc.push(`${i}. Periyot: Ev Sahibi ${periyot.EvSahibi} - Konuk Takım ${periyot.KonukTakim}`)
+    evSahibiSkor += periyot.EvSahibi;
+    konukTakimSkor += periyot.KonukTakim;
+  }
+  if (evSahibiSkor == konukTakimSkor) {
+    let i = 0;
+    while (evSahibiSkor == konukTakimSkor) {
+      i++;
+      const periyot = periyotSkoruCallBack(takimSkoruCallBack);
+      sonuc.push(`${i}. Uzatma: Ev Sahibi ${periyot.EvSahibi} - Konuk Takım ${periyot.KonukTakim}`);
+      evSahibiSkor += periyot.EvSahibi;
+      konukTakimSkor += periyot.KonukTakim;
+    }
+  }
+  sonuc.push(`Maç Sonucu: Ev Sahibi ${evSahibiSkor} - Konuk Takım ${konukTakimSkor}`);
+  return sonuc;
 }
-
+console.log("Skor Tabelasi Görevi:", skorTabelasi(periyotSkoru,takimSkoru,4));
 
 
 
